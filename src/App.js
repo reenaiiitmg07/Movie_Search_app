@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import {connect} from 'react-redux';
-import {getMovieData,getTermMovieData} from './actions/index';
+import {getMovieData} from './actions/index';
 
 class App extends Component {
   constructor(props) {
@@ -10,8 +10,8 @@ class App extends Component {
     this.state = {
       data: [],
       page: 1,
-      term: '',
-      years:[]
+      years:[],
+      movies:[]
     }
     this.loadMore=this.loadMore.bind(this);
     this.showYear=this.showYear.bind(this);
@@ -20,54 +20,59 @@ class App extends Component {
     this.props.getMovieData(1);
 }
 showYear(e){
-      let year = new Set();
-      //console.log(this.props.data);
-      this.props.data.map((item)=>{
-       console.log(item.Year);
-       year.add(item.Year);
-      })
-
-     this.setState({years:year});
-     console.log(this.state.years);
+let year=new Set();
+this.props.data.map((item)=>{
+  year.add(item.Year)
+})
+let array = Array.from(year);
+this.setState({years:array});
+console.log(array);
 }
 loadMore(e) {
-    let term = this.state.term;
     let page=this.state.page;
     page=page+1;
-    if(term){
-      this.props.getTermMovieData(term,page)
-    }
-    else{
-      this.props.getMovieData(this.state.page);
-    }
-    this.setState({page});
+    this.props.getMovieData(this.state.page);
+    this.setState({page:page,
+                  movies:[]});
 
 
   }
-
+  selectedMovie(year){
+    let movie=this.props.data.filter((item)=>item.Year==year);
+    this.setState({movies:movie})
+  }
+  onSearchChange(e){
+    let data=this.state.movies.length>0?this.state.movies:this.props.data;
+    let modifiedArray=data.filter((item)=>{
+    return item.Title.toLowerCase().indexOf(e.target.value.toLowerCase())>0
+    })
+    this.setState({movies:modifiedArray})
+    }
   render() {
-    let Movie=this.props.data;
+    let Movie=this.state.movies.length>0?this.state.movies:this.props.data;
     console.log(Movie);
+    console.log(this.state.years);
+    console.log(this.state.movies);
     return (
       <div className="App">
-          <div className="row search-bar" style={{ textAlign: 'center', padding: '10px' }}> <input/></div>
+          <div className="row search-bar"  style={{ textAlign: 'center', padding: '10px' }}> <input style={{width:"400px"}} onChange={this.onSearchChange.bind(this)}/></div>
           <div className="row">
-             <div className="col-sm-4">
+             <div className="col-sm-2">
                 <div className="row" style={{ textAlign: 'center' }}><button onClick={this.showYear} className="btn btn-primary">Show Filter</button></div>
-                 <ul>
+                 <ul className="list list-unstyled responsive" style={{ padding: '10px' }}>
                 {this.state.years?this.state.years.map((item)=>{
                   return(
-                    <li>
-                       <button onClick={this.selectedMovie} className="btn btn-primary">{item}</button>
+                    <li style={{marginTop: "10px"}}>
+                       <button onClick={this.selectedMovie.bind(this,item)} className="btn btn-primary">{item}</button>
                     </li>
                   )
 
                 }):null}
                 </ul>
             </div>
-            <div className="col-sm-8">
+            <div className="col-sm-10">
                <ul className="list list-inline list-unstyled responsive" style={{ padding: '10px' }}>
-                 {this.props.data?this.props.data.map((item)=>{
+                 {Movie?Movie.map((item)=>{
                   return (
                        <li style={{ border: '1px solid #80808038' }}>
                        <div className="card" style={{width:'200px',height:'300px'}}>
@@ -91,8 +96,8 @@ loadMore(e) {
 
 function mapStateToProps(state){
   return{
-    data:state.data.Search
+    data:[].concat(...state.data)
   }
 
 }
-export default connect(mapStateToProps,{getMovieData,getTermMovieData})(App);
+export default connect(mapStateToProps,{getMovieData})(App);

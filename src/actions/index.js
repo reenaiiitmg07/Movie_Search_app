@@ -10,11 +10,3 @@ export function getMovieData(page){
     }
 
 }
-
-export function getTermMovieData(term,page){
-    let data=axios.get("http://www.omdbapi.com/?s=" + term +"&apikey=5ce2c41a&page=" +page)
-    return{
-        type: MOVIE_TERM_DATA,
-        payload:data
-    }
-}

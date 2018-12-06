@@ -6,7 +6,7 @@ export  function MovieData (state=[],action){
     switch(action.type){
 
         case MOVIE_DATA:
-            return action.payload.data
+            return [...state,action.payload.data.Search]
 
         default:
                 return state
